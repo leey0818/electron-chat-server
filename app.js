@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 
 const config = require('./config');
 const port = process.env.PORT || 3000;
@@ -21,3 +22,9 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Express is running on port ${port}`);
 });
+
+
+mongoose.connect(config.mongodb.url, config.mongodb.options);
+const db = mongoose.connection;
+db.on('error', console.error);
+db.on('open', () => console.log('Connected to mongodb server.'));
