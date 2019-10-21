@@ -13,6 +13,11 @@ const UserSchema = new mongoose.Schema({
 /** define static methods */
 // 사용자 생성
 UserSchema.statics.create = function (username, password) {
+  // 입력값 검증
+  if (!username || !password) {
+    throw new Error('username and password is required');
+  }
+
   // 비밀번호 암호화
   const encrypt = (salt) => {
     return bcrypt.hash(password, salt);
@@ -40,7 +45,7 @@ UserSchema.statics.findOneByUsername = function (username) {
 /** define public methods */
 // 암호화된 비밀번호 비교
 UserSchema.methods.verifyPassword = function (password) {
-  return bcrypt.compare(this.password, password);
+  return bcrypt.compare(password, this.password);
 };
 
 // 토큰값 검증
