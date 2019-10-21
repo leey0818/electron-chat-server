@@ -21,13 +21,10 @@ app.get('/', (req, res) => {
 // api router
 app.use('/api', require('./routes/api'));
 
+// connect to mongodb server
+mongoose.connect(config.mongodb.url, config.mongodb.options)
+  .then(() => console.log('Connected to mongodb server.'))
+  .catch((e) => console.error(e));
 
-app.listen(port, () => {
-  console.log(`Express is running on port ${port}`);
-});
 
-
-mongoose.connect(config.mongodb.url, config.mongodb.options);
-const db = mongoose.connection;
-db.on('error', console.error);
-db.on('open', () => console.log('Connected to mongodb server.'));
+app.listen(port, () => console.log(`Express is running on port ${port}`));
