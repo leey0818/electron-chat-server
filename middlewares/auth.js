@@ -1,9 +1,8 @@
-const jwt = require('jsonwebtoken');
+const tokenHelper = require('../utils/tokenHelper');
 const UserModel = require('../models/user');
 
 module.exports = (req, res, next) => {
   const token = req.headers['x-access-token'] || req.query.token;
-  const secret = req.app.get('jwt-secret');
 
   if (!token) {
     return res.status(403).json({
@@ -11,13 +10,6 @@ module.exports = (req, res, next) => {
       message: 'not logged in',
     });
   }
-
-  const verifyToken = () => new Promise((resolve, reject) => {
-    jwt.verify(token, secret, (err, decoded) => {
-      if (err) reject(err);
-      resolve(decoded);
-    });
-  });
 
   const verifyUser = (decoded) => {
     return UserModel.findOneByUsername(decoded.username)
@@ -47,7 +39,7 @@ module.exports = (req, res, next) => {
     });
   };
 
-  return verifyToken()
+  return tokenHelper.verify(token)
     .then(verifyUser)
     .then(setDecoded)
     .catch(onError);
