@@ -15,4 +15,9 @@ module.exports = {
       reconnectTries: 10,
     },
   },
+  socket: {
+    transports: ['websocket'],
+    pingInterval: 30000,
+    pingTimeout: 5000,
+  },
 };
