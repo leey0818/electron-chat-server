@@ -7,6 +7,7 @@ const io = require('socket.io')();
 const app = express();
 const server = http.createServer(app);
 
+const tokenHelper = require('./utils/tokenHelper');
 const config = require('./config');
 const port = process.env.PORT || 3000;
 
@@ -27,6 +28,24 @@ app.use('/api', require('./routes/api'));
 // define socket server
 app.io = io;
 io.attach(server, config.socket);
+
+io.use((socket, next) => {
+  const { token } = socket.handshake.query;
+  console.log(`Received token: ${token}`);
+
+  if (token) {
+    tokenHelper.verify(token)
+      .then((decoded) => {
+        socket.decoded = decoded;
+        next();
+      })
+      .catch((err) => {
+        next(err);
+      });
+  } else {
+    next(new Error('UnauthorizedError'));
+  }
+});
 
 io.on('connection', (socket) => {
   console.log(`Socket connected! ${socket.id}`);
