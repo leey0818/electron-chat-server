@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const tokenHelper = require('../../../utils/tokenHelper');
 const UserModel = require('../../../models/user');
 
 /*
@@ -12,7 +12,6 @@ const UserModel = require('../../../models/user');
 */
 module.exports = (req, res) => {
   const { username, password } = req.body;
-  const secret = req.app.get('jwt-secret');
 
   const verify = (user) => {
     if (!user) {
@@ -29,23 +28,16 @@ module.exports = (req, res) => {
   };
 
   const createToken = (user) => {
-    return new Promise((resolve, reject) => {
-      jwt.sign(
-        {
-          _id: user._id,
-          username: user.username,
-        },
-        secret,
-        {
-          expiresIn: '7d',
-          subject: 'userInfo',
-        },
-        (err, token) => {
-          if (err) return reject(err);
-          resolve({ user, token });
-        }
-      );
-    });
+    return tokenHelper.generate(
+      {
+        _id: user._id,
+        username: user.username,
+      },
+      {
+        expiresIn: '7d',
+        subject: 'userInfo',
+      },
+    );
   };
 
   const updateUser = ({ user, token }) => {
