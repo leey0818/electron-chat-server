@@ -23,7 +23,7 @@ module.exports = (req, res, next) => {
           throw new Error('invalid token');
         }
 
-        return Promise.resolve(decoded);
+        return decoded;
       });
   };
 

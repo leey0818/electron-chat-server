@@ -7,6 +7,7 @@ const io = require('socket.io')();
 const app = express();
 const server = http.createServer(app);
 
+const UserModel = require('./models/user');
 const tokenHelper = require('./utils/tokenHelper');
 const config = require('./config');
 const port = process.env.PORT || 3000;
@@ -31,24 +32,57 @@ io.attach(server, config.socket);
 
 io.use((socket, next) => {
   const { token } = socket.handshake.query;
-  console.log(`Received token: ${token}`);
 
   if (token) {
     tokenHelper.verify(token)
       .then((decoded) => {
-        socket.decoded = decoded;
-        next();
-      })
-      .catch((err) => {
-        next(err);
-      });
+        console.log(`token verified! check valid user... ${decoded.username}`);
+
+        // 사용자 인증
+        return UserModel.findOneByUsername(decoded.username)
+          .then((user) => {
+            if (!user) {
+              throw new Error('not exist user');
+            }
+
+            if (!user.verifyToken(token)) {
+              throw new Error('invalid token');
+            }
+
+            return user;
+          });
+        })
+        .then((user) => {
+          socket.info = {
+            id: user._id,
+            username: user.username,
+          };
+
+          console.log(`successfully authorized. ${socket.info.username}`);
+
+          next();
+        })
+        .catch((err) => {
+          console.log(`${err.name} : ${err.message}`);
+
+          switch (err.name) {
+            case 'TokenExpiredError':
+              return next(new Error('expired token'));
+            case 'JsonWebTokenError':
+            case 'NotBeforeError':
+              return next(new Error('invalid token'));
+            default:
+              return next(new Error('unauthorized user'));
+          }
+        });
   } else {
-    next(new Error('UnauthorizedError'));
+    console.log('token not received');
+    next(new Error('unauthorized user'));
   }
 });
 
 io.on('connection', (socket) => {
-  console.log(`Socket connected! ${socket.id}`);
+  console.log(`Socket connected! ${socket.info.username} : ${socket.id}`);
   socket.broadcast.emit('user.enter', { message: `user entered! ${socket.id}` });
 
   // socket event handler
