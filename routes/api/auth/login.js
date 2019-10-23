@@ -37,7 +37,7 @@ module.exports = (req, res) => {
         expiresIn: '7d',
         subject: 'userInfo',
       },
-    );
+    ).then((token) => Promise.resolve({ user, token }));
   };
 
   const updateUser = ({ user, token }) => {
