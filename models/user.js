@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },
   password: { type: String ,required: true },
   token: String,
+  refreshToken: String,
 
   CreatedAt: { type: Date, default: Date.now },
   UpdatedAt: { type: Date, default: Date.now },
@@ -48,9 +49,14 @@ UserSchema.methods.verifyPassword = function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-// 토큰값 검증
+// 사용자 토큰 값 검증
 UserSchema.methods.verifyToken = function (token) {
   return this.token === token;
+};
+
+// refresh 토큰 값 확인
+UserSchema.methods.checkRefreshToken = function (refreshToken) {
+  return this.refreshToken === refreshToken;
 };
 
 

@@ -27,30 +27,43 @@ module.exports = (req, res) => {
     });
   };
 
-  const createToken = (user) => {
+  const createAccessToken = (user) => {
     return tokenHelper.generate(
       {
         _id: user._id,
         username: user.username,
       },
       {
-        expiresIn: '7d',
+        expiresIn: '1h',
         subject: 'userInfo',
       },
     ).then((token) => Promise.resolve({ user, token }));
   };
 
-  const updateUser = ({ user, token }) => {
-    return user.set({
-      token,
-      UpdatedAt: Date.now(),
-    }).save().then(() => Promise.resolve(token));
+  const createRefreshToken = ({ user, token }) => {
+    return tokenHelper.generate(
+      {
+        username: user.username,
+      },
+      {
+        expiresIn: '30d',
+      },
+    ).then((refreshToken) => Promise.resolve({ user, token, refreshToken }));
   };
 
-  const respond = (token) => {
+  const updateUser = ({ user, token, refreshToken }) => {
+    return user.set({
+      token,
+      refreshToken,
+      UpdatedAt: Date.now(),
+    }).save().then(() => Promise.resolve({ token, refreshToken }));
+  };
+
+  const respond = ({ token, refreshToken }) => {
     res.json({
       message: 'login successfully',
       token,
+      refreshToken,
     });
   };
 
@@ -62,7 +75,8 @@ module.exports = (req, res) => {
 
   return UserModel.findOneByUsername(username)
     .then(verify)
-    .then(createToken)
+    .then(createAccessToken)
+    .then(createRefreshToken)
     .then(updateUser)
     .then(respond)
     .catch(onError);
