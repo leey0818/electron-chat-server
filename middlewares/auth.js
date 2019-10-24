@@ -33,9 +33,23 @@ module.exports = (req, res, next) => {
   };
 
   const onError = (error) => {
-    res.status(403).json({
+    let message;
+
+    switch (error.name) {
+      case 'TokenExpiredError':
+        message = 'expired token';
+        break;
+      case 'JsonWebTokenError':
+      case 'NotBeforeError':
+        message = 'invalid token';
+        break;
+      default:
+        message = error.message;
+    }
+
+    res.status(401).json({
       success: false,
-      message: error.message,
+      message
     });
   };
 
