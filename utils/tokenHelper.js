@@ -28,7 +28,33 @@ const verify = (token) => {
   });
 };
 
+/**
+ * 발생한 오류가 JWT 관련 오류인지 확인합니다.
+ * @param {Error} error error
+ */
+const isTokenError = (error) => {
+  switch (error && error.name) {
+    case 'TokenExpiredError':
+    case 'JsonWebTokenError':
+    case 'NotBeforeError':
+      return true;
+    default:
+      return false;
+  }
+};
+
+/**
+ * 발생한 오류가 JWT 토큰 만료 오류인지 확인합니다.
+ * @param {Error} error error
+ */
+const isTokenExpiredError = (error) => {
+  return (error && error.name === 'TokenExpiredError');
+};
+
+
 module.exports = {
   generate,
   verify,
+  isTokenError,
+  isTokenExpiredError,
 };
