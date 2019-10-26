@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const UserSchema = new mongoose.Schema({
+const { Schema } = mongoose;
+
+const UserSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String ,required: true },
   token: String,
   refreshToken: String,
+
+  rooms: [{ type: Schema.Types.ObjectId, ref: 'Room' }],
+  inviteRooms: [{ type: Schema.Types.ObjectId, ref: 'Room' }],
 
   CreatedAt: { type: Date, default: Date.now },
   UpdatedAt: { type: Date, default: Date.now },

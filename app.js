@@ -47,6 +47,13 @@ io.on('connection', (socket) => {
     console.log(`socket message received. ${data.message}`);
     socket.broadcast.emit('message,receive', { message: data.message });
   });
+
+  // room event handler
+  socket.on('room.create', require('./handlers/room/create')(socket));
+  // socket.on('room.update', () => {});
+  // socket.on('room.remove', () => {});
+  // socket.on('room.join', () => {});
+  // socket.on('room.leave', () => {});
 });
 
 
