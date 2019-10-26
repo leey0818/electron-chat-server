@@ -14,10 +14,6 @@ module.exports = (socket, next) => {
 
     return UserModel.findOneByUsername(username)
       .then((user) => {
-        if (!user) {
-          throw new Error('not exist user');
-        }
-
         // 사용자 토큰 검증
         if (!user.verifyToken(token)) {
           throw new Error('invalid token');
@@ -41,18 +37,14 @@ module.exports = (socket, next) => {
   const onError = (error) => {
     console.log(`${error.name} : ${error.message}`);
 
-    switch (error.name) {
-      case 'TokenExpiredError':
-        return next(new Error('expired token'));
-      case 'JsonWebTokenError':
-      case 'NotBeforeError':
-        return next(new Error('invalid token'));
-      default:
-        if (error.message === 'invalid token') {
-          return next(error);
-        } else {
-          return next(new Error('unauthorized user'));
-        }
+    if (tokenHelper.isTokenExpiredError(error)) {
+      next(new Error('expired token'));
+    } else if (tokenHelper.isTokenError(error)) {
+      next(new Error('invalid token'));
+    } else if (error.message === 'invalid token') {
+      next(error);
+    } else {
+      next(new Error('unauthorized user'));
     }
   };
 

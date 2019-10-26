@@ -33,7 +33,7 @@ module.exports = (req, res) => {
     });
   };
 
-  return UserModel.findOneByUsername(username)
+  return UserModel.findOneByUsername(username, false)
     .then(create)
     .then(respond)
     .catch(onError);

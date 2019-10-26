@@ -15,10 +15,7 @@ module.exports = (req, res) => {
   const verifyUser = (decoded) => {
     return UserModel.findOneByUsername(decoded.username)
       .then((user) => {
-        if (!user) {
-          throw new Error('unauthorized user');
-        }
-
+        // refresh 토큰이 일치하지 않으면 접근 거부
         if (!user.checkRefreshToken(refreshToken)) {
           throw new Error('invalid refresh token');
         }

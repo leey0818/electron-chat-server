@@ -73,7 +73,7 @@ module.exports = (req, res) => {
     });
   };
 
-  return UserModel.findOneByUsername(username)
+  return UserModel.findOneByUsername(username, false)
     .then(verify)
     .then(createAccessToken)
     .then(createRefreshToken)

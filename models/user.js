@@ -43,8 +43,14 @@ UserSchema.statics.create = function (username, password) {
 };
 
 // 사용자명에 대한 데이터 검색
-UserSchema.statics.findOneByUsername = function (username) {
-  return this.findOne({ username }).exec();
+UserSchema.statics.findOneByUsername = function (username, throwError = true) {
+  return this.findOne({ username }).then((user) => {
+    if (!user && throwError) {
+      return Promise.reject(new Error('not exist user'));
+    }
+
+    return user;
+  });
 };
 
 

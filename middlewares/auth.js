@@ -14,11 +14,7 @@ module.exports = (req, res, next) => {
   const verifyUser = (decoded) => {
     return UserModel.findOneByUsername(decoded.username)
       .then((user) => {
-        // 사용자가 없거나, 사용자 토큰이 일치하지 않으면 접근 거부
-        if (!user) {
-          throw new Error('unauthroized user');
-        }
-
+        // 사용자 토큰이 일치하지 않으면 접근 거부
         if (!user.verifyToken(token)) {
           throw new Error('invalid token');
         }
