@@ -1,10 +1,12 @@
 const UserModel = require('../../models/user');
 const RoomModel = require('../../models/room');
 
-module.exports = (socket) => ({ roomName }) => {
+module.exports = (socket) => ({ roomName }, cb) => {
   // 방 이름 검증
   if (!roomName) {
-    throw new Error('room name is not exist.');
+    cb({ success: false, message: 'room name is not exist.'});
+    return;
+
     // TODO 방 이름 글자수 및 문자 검증 예정
   }
 
@@ -24,13 +26,32 @@ module.exports = (socket) => ({ roomName }) => {
     return user.save().then(() => Promise.resolve(room));
   };
 
-  const joinRoom = ({ room }) => {
+  // 해당 방에 join
+  const joinRoom = (room) => {
     socket.join(room._id);
+
+    return room;
+  };
+
+  const onSuccess = (room) => {
+    cb({
+      success: true,
+      name: room.name,
+      count: room.users.length,
+    });
+  };
+
+  const onError = (error) => {
+    console.log('Error occurred when create room! ', error.name, ' : ', error.message);
+
+    cb({ success: false, message: error.message });
   };
 
 
   return UserModel.findOneByUsername(socket.info.username)
     .then(createRoom)
     .then(pushRoomToUser)
-    .then(joinRoom);
+    .then(joinRoom)
+    .then(onSuccess)
+    .catch(onError);
 };
