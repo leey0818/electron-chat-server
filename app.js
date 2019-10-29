@@ -42,13 +42,17 @@ io.on('connection', (socket) => {
     console.log(`Socket disconnected. reason: ${reason}`);
   });
 
-  // user event handler
+  // message event handler
   socket.on('message.send', (data) => {
     console.log(`socket message received. ${data.message}`);
     socket.broadcast.emit('message,receive', { message: data.message });
   });
 
+  // user event handler
+  socket.on('user.search', require('./handlers/user/search')(socket));
+
   // room event handler
+  socket.on('room.list', require('./handlers/room/list')(socket));
   socket.on('room.create', require('./handlers/room/create')(socket));
   // socket.on('room.update', () => {});
   // socket.on('room.remove', () => {});
