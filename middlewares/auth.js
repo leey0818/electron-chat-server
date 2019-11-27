@@ -2,14 +2,16 @@ const tokenHelper = require('../utils/tokenHelper');
 const UserModel = require('../models/user');
 
 module.exports = (req, res, next) => {
-  const token = req.headers['x-access-token'] || req.query.token;
+  let token = req.headers['authorization'] || req.query.token;
 
-  if (!token) {
+  if (!token || !token.startsWith('Bearer ')) {
     return res.status(403).json({
       success: false,
       message: 'not logged in',
     });
   }
+
+  token = token.substr(7);
 
   const verifyUser = (decoded) => {
     return UserModel.findOneByUsername(decoded.username)
